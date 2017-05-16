@@ -1,0 +1,951 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Introduction to rare events and collective variables
+\end_layout
+
+\begin_layout Author
+Giovanni Bussi
+\end_layout
+
+\begin_layout Section
+Motivation
+\end_layout
+
+\begin_layout Standard
+Molecular dynamics (MD) simulations can be used to produce trajectories
+ for systems composed of hundreds to millions of atoms.
+ However, it is very difficult to analyze all these coordinates without
+ simplifying them by means of some form of dimensional reduction.
+ The variables obtained from a dimensional reduction are usually complex
+ collective functions of the microscopic coordinates, and are thus called
+ 
+\emph on
+collective variables.
+\end_layout
+
+\begin_layout Standard
+Collective variables (CVs) are however not used just to 
+\emph on
+analyze
+\emph default
+ simulations, but can also be used to 
+\emph on
+bias
+\emph default
+ simulation.
+ This is particularly interesting in the case of rare event sampling.
+ The timestep for MD is typically in between 
+\begin_inset Formula $10^{-13}$
+\end_inset
+
+ and 
+\begin_inset Formula $10^{-12}$
+\end_inset
+
+ seconds.
+ However, many processes happen on timescales that are many orders of magnitude
+ larger (e.g.
+ milliseconds or seconds).
+ Sometime these long time scales can be rationalized in terms of the slow
+ dynamics of a limited number of CVs subject to 
+\emph on
+free energy barriers
+\emph default
+.
+ In these cases, knowledge of these CVs can be exploited to accelerate dynamics.
+\end_layout
+
+\begin_layout Standard
+In the next sections we will learn more about what is a CV and how it can
+ be used to 
+\emph on
+analyze
+\emph default
+ and 
+\emph on
+bias
+\emph default
+ a molecular dynamics simulation.
+\end_layout
+
+\begin_layout Section
+Collective variables
+\end_layout
+
+\begin_layout Standard
+Collective variables provide a coarse graining of the coordinates of a system.
+ Let's consider some example:
+\end_layout
+
+\begin_layout Itemize
+A nucleoside, where isomerization around the glycosidic bond can be described
+ by the torsional angle 
+\begin_inset Formula $\chi$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+A protein that is folding, where the progression along the folding trajectory
+ might be described using the number of native contacts.
+\end_layout
+
+\begin_layout Itemize
+A ion translocating across a membrane, where the translocation might be
+ described using the 
+\begin_inset Formula $z$
+\end_inset
+
+ projection of its Cartesian coordinates, or better of their distance from
+ the center of the membrane.
+\end_layout
+
+\begin_layout Itemize
+The transfer of a proton between two atoms, that can be described by the
+ distances between the hydrogen and the two atoms.
+\end_layout
+
+\begin_layout Itemize
+The association of two ions in solution, that can be described by the distance
+ between the two ions and perhaps the number of water molecules interacting
+ with each ion.
+\end_layout
+
+\begin_layout Standard
+In these cases one might want to describe a process that in reality involves
+ a large number of atoms looking only at a few degrees of freedom of the
+ system (e.g.
+ a torsional angle or a distance between two atoms).
+ Notice that the state of the system is fully determined by the microscopic
+ coordinates and velocities 
+\begin_inset Formula $q$
+\end_inset
+
+ and 
+\begin_inset Formula $v$
+\end_inset
+
+.
+ A CV is just an arbitrary function of 
+\begin_inset Formula $q$
+\end_inset
+
+ and, optionally (but almost never!), of 
+\begin_inset Formula $v$
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+s=s(q,v)
+\]
+
+\end_inset
+
+In the following we will use everywhere 
+\begin_inset Formula $s$
+\end_inset
+
+ as if a single CV was defined, but obviously a process might require multiple
+ variables to be described.
+ All the equations are easily generalized to the case where 
+\begin_inset Formula $s$
+\end_inset
+
+ is actually a vector.
+\end_layout
+
+\begin_layout Subsection
+Angles, distances, centers
+\end_layout
+
+\begin_layout Standard
+Common CVs are angles and distances between atoms or groups of atoms.
+ CVs might depend on the position of the center of a molecule rather than
+ that of a specific atom.
+ For instance, if you want to analize a small molecule translocating across
+ a membrane, you might use the 
+\begin_inset Formula $z$
+\end_inset
+
+ projection of its center.
+\end_layout
+
+\begin_layout Subsection
+Coordination numbers
+\end_layout
+
+\begin_layout Standard
+Notice that collective variables can in principle be discontinuous functions
+ of positions.
+ This is fine if you only want to analyze an MD trajectory.
+ However, if you want to bias a trajectory you will need collective variables
+ that are continuous functions of positions.
+ This is why variables such as the 
+\begin_inset Quotes eld
+\end_inset
+
+number of neighbors of atom 
+\begin_inset Formula $i$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ are written as 
+\begin_inset Formula 
+\[
+s_{i}=\sum_{j}f(d_{ij})
+\]
+
+\end_inset
+
+Here 
+\begin_inset Formula $d_{ij}$
+\end_inset
+
+ is the distance between atom 
+\begin_inset Formula $i$
+\end_inset
+
+ and atom 
+\begin_inset Formula $j$
+\end_inset
+
+, and 
+\begin_inset Formula $f(x)$
+\end_inset
+
+ is a so-called 
+\begin_inset Quotes eld
+\end_inset
+
+switching function
+\begin_inset Quotes erd
+\end_inset
+
+ that goes from 1 to 0 as 
+\begin_inset Formula $x$
+\end_inset
+
+ goes from 0 to infinity.
+ A typical switching function is
+\begin_inset Formula 
+\[
+f(r)=\frac{1}{1+\left(r/r_{0}\right)^{6}}
+\]
+
+\end_inset
+
+Here 
+\begin_inset Formula $r_{0}$
+\end_inset
+
+ here is the distance for which the value of the switching function is 
+\begin_inset Formula $1/2$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Number of native contacts
+\end_layout
+
+\begin_layout Standard
+Imagine that you know the list of a number of contacts that are formed when
+ a protein is folded and are not formed when it is not folded (native contacts).
+ You can analyze a folding trajectory by counting the number of formed contacts
+ with a collective variable such as 
+\begin_inset Formula 
+\[
+s=\sum_{ij\in NC}f(d_{ij})
+\]
+
+\end_inset
+
+Here 
+\begin_inset Formula $NC$
+\end_inset
+
+ is the list of pairs of atoms corresponding to native contacts, and 
+\begin_inset Formula $f$
+\end_inset
+
+ is a switching function like the one mentioned above.
+\end_layout
+
+\begin_layout Section
+Free-energy landscapes
+\end_layout
+
+\begin_layout Standard
+If the system is at thermodynamic equilibrium, the probability of finding
+ a given value of 
+\begin_inset Formula $q$
+\end_inset
+
+ and 
+\begin_inset Formula $v$
+\end_inset
+
+ is the Boltzmann distribution
+\begin_inset Formula 
+\begin{equation}
+P(q,v)\propto e^{-\frac{K(v)+U(q)}{k_{B}T}}
+\end{equation}
+
+\end_inset
+
+Here 
+\begin_inset Formula $U(q)$
+\end_inset
+
+ is the potential energy and 
+\begin_inset Formula $K(v)$
+\end_inset
+
+ is the kinetic energy, 
+\begin_inset Formula $k_{B}$
+\end_inset
+
+ is the Boltzmann constant and 
+\begin_inset Formula $T$
+\end_inset
+
+ is the temperature.
+ The equivalent of the Boltzmann distribution for a CV is obtained by marginaliz
+ation:
+\begin_inset Formula 
+\[
+P(s)\propto\int dqdvP(q,v)\delta(s(q,v)-s)
+\]
+
+\end_inset
+
+This distribution can be expressed as
+\begin_inset Formula 
+\[
+P(s)\propto e^{-\frac{F(s)}{k_{B}T}}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $F(s)$
+\end_inset
+
+ is the free-energy associated to the value 
+\begin_inset Formula $s$
+\end_inset
+
+ of the collective variable.
+ 
+\begin_inset Formula $F$
+\end_inset
+
+ is also called potential of mean force since its gradient corresponds to
+ the average force acting on a collective variable.
+ By straightforward algebra one can express 
+\begin_inset Formula $F$
+\end_inset
+
+ as 
+\begin_inset Formula 
+\[
+F(s)=-k_{B}T\log\int dqdvP(q,v)\delta(s(q,v)-s)+C
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $C$
+\end_inset
+
+ is an arbitrary constant.
+ Notice that 
+\begin_inset Formula $F(s)$
+\end_inset
+
+ is nothing more that 
+\begin_inset Quotes eld
+\end_inset
+
+the marginal probability expressed in energy units
+\begin_inset Quotes erd
+\end_inset
+
+.
+ States (i.e.
+ value of 
+\begin_inset Formula $s$
+\end_inset
+
+) with a large free energy are states with a low population.
+\end_layout
+
+\begin_layout Standard
+Provided you have a trajectory that is long enough to be ergodic and visit
+ all the relevant states of a system, you can obtain 
+\begin_inset Formula $F(s)$
+\end_inset
+
+ in the following way:
+\end_layout
+
+\begin_layout Enumerate
+Accumulate the histogram of the visited values of 
+\begin_inset Formula $s$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Take its logarithm and multiply by 
+\begin_inset Formula $-k_{B}T$
+\end_inset
+
+ to have energy units.
+\end_layout
+
+\begin_layout Standard
+Sometime instead of being interested in the free-energy associated to a
+ single value of 
+\begin_inset Formula $s$
+\end_inset
+
+ you might be interested in the stability of a whole free-energy basin.
+ Remember the connection with probabilities, and notice that the probability
+ for a basin 
+\begin_inset Formula $A$
+\end_inset
+
+ can be obtained by integrating the probability on that basin.
+ Thus the free energy of a basin 
+\begin_inset Formula $A$
+\end_inset
+
+ will be
+\begin_inset Formula 
+\[
+F_{A}=-k_{B}T\log\int_{A}dse^{-\frac{F(s)}{k_{B}T}}+C
+\]
+
+\end_inset
+
+If you have two metastable basins (e.g.
+ 
+\emph on
+syn
+\emph default
+ and 
+\emph on
+anti
+\emph default
+), their free-energy difference is
+\begin_inset Formula 
+\[
+F_{syn}-F_{anti}=-k_{B}T\log\frac{\int_{syn}dse^{-\frac{F(s)}{k_{B}T}}}{\int_{anti}dse^{-\frac{F(s)}{k_{B}T}}}
+\]
+
+\end_inset
+
+So, if the system has 80% probability to be in 
+\emph on
+syn
+\emph default
+ and 20% probability to be in 
+\emph on
+anti
+\emph default
+, you can say that 
+\begin_inset Formula $\Delta F=0.6\text{kcal/mol}\times\log\frac{1}{4}\approx-0.83\text{kcal/mol}$
+\end_inset
+
+, where 
+\begin_inset Formula $k_{B}T\approx0.6\text{kcal/mol}$
+\end_inset
+
+.
+ You will then know that if you disfavor the 
+\emph on
+anti
+\emph default
+ state by 0.83 kcal/mol the two states will have the same probability.
+\end_layout
+
+\begin_layout Section
+Overlapping metastable states
+\end_layout
+
+\begin_layout Standard
+The free-energy landscape 
+\begin_inset Formula $F(s)$
+\end_inset
+
+ associated to a collective variable can always be defined and computed
+ as discussed above (if a long enough simulation can be performed).
+ However, depending on the choice of the collective variable, it might be
+ totally uninformative.
+ Imagine for instance a case where the typical values assumed by 
+\begin_inset Formula $s$
+\end_inset
+
+ in reactant and product states are overlapping.
+ Knowing the value of 
+\begin_inset Formula $s$
+\end_inset
+
+ will not be enough to decide in which metastable state the system is located.
+\end_layout
+
+\begin_layout Standard
+Remember that 
+\begin_inset Formula $s$
+\end_inset
+
+ is just a function of 
+\begin_inset Formula $q$
+\end_inset
+
+ and 
+\begin_inset Formula $v$
+\end_inset
+
+, so given 
+\begin_inset Formula $q$
+\end_inset
+
+ and 
+\begin_inset Formula $v$
+\end_inset
+
+ I can obtain a unique 
+\begin_inset Formula $s$
+\end_inset
+
+.
+ Conversely, there are many possible values of 
+\begin_inset Formula $q$
+\end_inset
+
+ and 
+\begin_inset Formula $v$
+\end_inset
+
+ that correspond to the same value of 
+\begin_inset Formula $s$
+\end_inset
+
+.
+ What I should check is that all these values (i.e.
+ all these conformations) belong to 
+\begin_inset Quotes eld
+\end_inset
+
+the same state
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The definition of 
+\begin_inset Quotes eld
+\end_inset
+
+belonging to the same state
+\begin_inset Quotes erd
+\end_inset
+
+ depends on which time scale I am investigating.
+ Clearly, if the typical time to isomerize a bond is on the order on 
+\begin_inset Formula $10^{-10}$
+\end_inset
+
+ seconds, on the timescale of 
+\begin_inset Formula $10^{-6}$
+\end_inset
+
+ seconds two isomers would correspond to the same state.
+ This won't be true if I want to analyze the system on the timescale of
+ picoseconds.
+\end_layout
+
+\begin_layout Section
+Enhancing transitions
+\end_layout
+
+\begin_layout Standard
+Let's now imagine that the value of the collective variable is sufficient
+ to completely characterize the state of the system.
+ Obviously, knowing 
+\begin_inset Formula $s$
+\end_inset
+
+ does not tell us the precise position of all the atoms of the system.
+ However, if knowing 
+\begin_inset Formula $s$
+\end_inset
+
+ is sufficient to characterize the system on timescale 
+\begin_inset Formula $\tau$
+\end_inset
+
+, the probability of observing a given value of the CV 
+\begin_inset Formula $s'$
+\end_inset
+
+ after a time 
+\begin_inset Formula $\tau$
+\end_inset
+
+ will only depend on the previous value of 
+\begin_inset Formula $s$
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+P(s',t+\tau|s,t)=M(s'\leftarrow s,\tau)
+\]
+
+\end_inset
+
+The dynamics of 
+\begin_inset Formula $s$
+\end_inset
+
+ will be Markovian on timescale 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Let's also consider 
+\begin_inset Formula $s$
+\end_inset
+
+ to be a discrete rather than continuous variable.
+ This is not a strong assumption, since it can be relaxed by assuming the
+ discrete values to be very dense.
+ We consider a simple system where 
+\begin_inset Formula $s$
+\end_inset
+
+ can only take three possible values for 
+\begin_inset Formula $s$
+\end_inset
+
+ (A, B and C), such that to go from 
+\begin_inset Formula $A$
+\end_inset
+
+ to 
+\begin_inset Formula $C$
+\end_inset
+
+ it is necessary to cross
+\begin_inset Formula $B$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+A\rightleftharpoons B\rightleftharpoons C
+\]
+
+\end_inset
+
+If 
+\begin_inset Formula $P(B)\ll P(A)\approx P(C)$
+\end_inset
+
+ then the transition between 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $C$
+\end_inset
+
+ will require a lot of time.
+ This can be interpreted as a 
+\begin_inset Quotes eld
+\end_inset
+
+free energy barrier
+\begin_inset Quotes erd
+\end_inset
+
+, since 
+\begin_inset Formula $F(B)$
+\end_inset
+
+ will be much larger than 
+\begin_inset Formula $F(A)$
+\end_inset
+
+ and 
+\begin_inset Formula $F(C)$
+\end_inset
+
+.
+ As you will learn later, by simply adding a bias potential that encourages
+ the system to visit 
+\begin_inset Formula $B$
+\end_inset
+
+ you will be able to greatly enhance the probability to see a transition
+ between 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $C$
+\end_inset
+
+.
+ This is basically the same way enzymes work: by relatively stabilizing
+ the transition state of a reaction.
+\end_layout
+
+\begin_layout Section
+Troubles with transition states
+\end_layout
+
+\begin_layout Standard
+To be useful in enhanced sampling techniques, CVs should be able to identify
+ transition states.
+ Let's make an example where it is not verified.
+ Let's start with a Markovian system with three states (
+\begin_inset Formula $A$
+\end_inset
+
+, 
+\begin_inset Formula $B$
+\end_inset
+
+, and 
+\begin_inset Formula $C$
+\end_inset
+
+, as above), where 
+\begin_inset Formula $P(B)\ll P(A)\approx P(C)$
+\end_inset
+
+.
+ Now let's make a further coarse graining and define a CV whose value is
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $s=0$
+\end_inset
+
+ when the system is in 
+\begin_inset Formula $A$
+\end_inset
+
+ or 
+\begin_inset Formula $B$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $s=1$
+\end_inset
+
+ when the system is in 
+\begin_inset Formula $C$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Our variable 
+\begin_inset Formula $s$
+\end_inset
+
+ is capable to distinguish 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $C$
+\end_inset
+
+ (the metastable minima) but not capable to distinguish 
+\begin_inset Formula $A$
+\end_inset
+
+ from 
+\begin_inset Formula $B$
+\end_inset
+
+ (the transition state from one of the minima).
+ Clearly, in this case stabilizing 
+\begin_inset Formula $B$
+\end_inset
+
+ (and thus also 
+\begin_inset Formula $A$
+\end_inset
+
+) would not increase the probability to see a transition between 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $C$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Section
+Comments
+\end_layout
+
+\begin_layout Standard
+Designing CVs with the properties above is far from trivial and highly system
+ dependent.
+ Often, they can only be found by trial and error.
+ In the case of analysis, trial and error means 
+\begin_inset Quotes eld
+\end_inset
+
+analyze multiple times the same simulation
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In the case of biased MD, trial and error means 
+\begin_inset Quotes eld
+\end_inset
+
+running MD again
+\begin_inset Quotes erd
+\end_inset
+
+, which can be painful.
+ A number of methods that allow to automatize, at least partially, this
+ search is available.
+ Learning how to combine existing CVs in PLUMED can significantly speedup
+ your workflow.
+ Finally, consider that once you will have found a CV that works well, the
+ choice of the CV should be considered a 
+\emph on
+result
+\emph default
+ of your work and will tell you which are the important physical or chemical
+ processes underlying the phenomenon you are studying.
+\end_layout
+
+\begin_layout Section
+Summary
+\end_layout
+
+\begin_layout Itemize
+Collective variables are generic functions of the microscopic coordinates
+ of system (hypothetically including velocities, though this is very rare).
+\end_layout
+
+\begin_layout Itemize
+To be useful in analysis, a collective variable should at least be able
+ to distinguish different metastable conformations.
+\end_layout
+
+\begin_layout Itemize
+When used for biasing trajectories, variables should be continuous.
+\end_layout
+
+\begin_layout Itemize
+To be useful in enhanced sampling methods based on collective variables
+ (e.g umbrella sampling, metadynamics, etc; you will learn more later about
+ these methods), a collective variable should in addition be able to correctly
+ distinguish the transition states from the metastable conformations.
+\end_layout
+
+\end_body
+\end_document
