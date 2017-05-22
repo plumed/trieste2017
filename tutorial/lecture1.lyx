@@ -27,6 +27,7 @@
 \bibtex_command default
 \index_command default
 \paperfontsize default
+\spacing single
 \use_hyperref false
 \papersize default
 \use_geometry false
@@ -144,7 +145,8 @@ Collective variables
 \end_layout
 
 \begin_layout Standard
-Collective variables provide a coarse graining of the coordinates of a system.
+Collective variables (CV) provide a coarse graining of the coordinates of
+ a system.
  Let's consider some example:
 \end_layout
 
@@ -218,8 +220,8 @@ In the following we will use everywhere
 \begin_inset Formula $s$
 \end_inset
 
- as if a single CV was defined, but obviously a process might require multiple
- variables to be described.
+ as if a single CV was defined, but a process might require multiple variables
+ to be described.
  All the equations are easily generalized to the case where 
 \begin_inset Formula $s$
 \end_inset
@@ -228,11 +230,13 @@ In the following we will use everywhere
 \end_layout
 
 \begin_layout Subsection
-Angles, distances, centers
+Distances, angles, torsions, and centers
 \end_layout
 
 \begin_layout Standard
-Common CVs are angles and distances between atoms or groups of atoms.
+Common CVs are distances, angles, and dihedral angles between atoms or groups
+ of atoms.
+ Angles are not necessarily between atoms that are chemically bound.
  CVs might depend on the position of the center of a molecule rather than
  that of a specific atom.
  For instance, if you want to analize a small molecule translocating across
@@ -241,6 +245,31 @@ Common CVs are angles and distances between atoms or groups of atoms.
 \end_inset
 
  projection of its center.
+\end_layout
+
+\begin_layout Subsection
+Positions
+\end_layout
+
+\begin_layout Standard
+Atomic positions might be directly used as CVs.
+ Notice however that MD simulations are virtually always subject to a translatio
+nally invariant potential energy function.
+ Thus, the position of an atom is usually not capable to describe any process.
+ Think about a ion translocating across a membrane.
+ For a given 
+\begin_inset Formula $z$
+\end_inset
+
+ component of the ion coordinates, the ion might be inside the membrane.
+ However, if the membrane moves, for the same component the ion might be
+ outside the membrane.
+ It is thus much better to use the 
+\begin_inset Formula $z$
+\end_inset
+
+ component of the distance between the coordinates of the ion and the center
+ of the membrane.
 \end_layout
 
 \begin_layout Subsection
@@ -319,6 +348,20 @@ Here
 \end_inset
 
 .
+ Replacing the exponent 
+\begin_inset Formula $6$
+\end_inset
+
+ with a larger (smaller) number can make the switch more (less) steep.
+\end_layout
+
+\begin_layout Standard
+Notice that for historical reasons you often find the function above written
+ as
+\begin_inset Formula $f(r)=\frac{1-\left(r/r_{0}\right)^{6}}{1-\left(r/r_{0}\right)^{12}}$
+\end_inset
+
+, which is actually identical.
 \end_layout
 
 \begin_layout Subsection
@@ -346,6 +389,140 @@ Here
 \end_inset
 
  is a switching function like the one mentioned above.
+\end_layout
+
+\begin_layout Subsection
+Root mean square deviation
+\end_layout
+
+\begin_layout Standard
+Image that you want to know if the structure of a protein correspond to
+ the native structure or not.
+ The best way to do it is probably to look at number of native contacts.
+ However, a very common alternative is to compute the root mean square deviation
+ (RMSD) between present coordinates and coordinates in the reference structure.
+ RMSD is defined as
+\begin_inset Formula 
+\[
+s=\sqrt{\frac{1}{N}\sum_{i}\left(r_{i}-r_{i}^{(ref)}\right)^{2}}
+\]
+
+\end_inset
+
+Here 
+\begin_inset Formula $r_{i}$
+\end_inset
+
+ are the coordinates of atom 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $r_{i}^{(ref)}$
+\end_inset
+
+ are the coordinates of the corresponding atom in the reference structure.
+ 
+\begin_inset Formula $N$
+\end_inset
+
+ is the number of atoms.
+ Using the formula above as is would lead to the same problems that you
+ would have using directly positions as CVs.
+ RMSD is often computed after choosing the reference frame (i.e.
+ after applying a rototranslation) that minimizes the RMSD itself.
+ Sometime it is computed after choosing a translation that minimizes the
+ RMSD.
+ Also notice that typically not all the atoms are used for RMSD calculations.
+ It is also possible to choose a rototranslation that minimizes the RMSD
+ of a group of atom and them compute the RMSD using a different group of
+ atoms.
+ This is common for instance to track the position of a ligand in the reference
+ frame of a protein.
+\end_layout
+
+\begin_layout Subsection
+Gyration radius
+\end_layout
+
+\begin_layout Standard
+Imagine that you have a molecule and you want to compute its 
+\begin_inset Quotes eld
+\end_inset
+
+radius
+\begin_inset Quotes erd
+\end_inset
+
+.
+ A possible definition is the gyration radius, which is defined as
+\begin_inset Formula 
+\[
+s=\sqrt{\frac{1}{N}\sum_{i}\left(r_{i}-r_{c}\right)^{2}}
+\]
+
+\end_inset
+
+Here 
+\begin_inset Formula $r_{c}$
+\end_inset
+
+ is the geometric center of the molecule.
+ As an alternative the sum might be mass weighted (in which case 
+\begin_inset Formula $r_{c}$
+\end_inset
+
+ would be the center of mass).
+\end_layout
+
+\begin_layout Subsection
+Cell parameters
+\end_layout
+
+\begin_layout Standard
+Most molecular dynamics simulations are performed in a confined cell.
+ When the parameters of this cell are allowed to change (e.g.
+ in any constant pressure or constant stress simulation), they might be
+ used as collective variable.
+ Even though technically the are not function of the atomic coordinates,
+ they influence the way atoms interact.
+ For instance, a solid and a liquid might be distinguished by the different
+ density.
+\end_layout
+
+\begin_layout Subsection
+Periodic boundary conditions
+\end_layout
+
+\begin_layout Standard
+Some CVs are calculated taking into account implicitly the periodic boundary
+ conditions.
+ This is for instance the case of a distance between two atoms.
+ The two atoms might be on opposite sides of the simulation box but still
+ their distance be small through a periodic image.
+ However, some variables do not play well with periodic boundary conditions
+ and are usually computed without.
+ Examples are: gyration radius, centers of molecules, RMSDs, etc.
+ For this variables to be properly defined one should make sure to specify
+ how the periodic boundaries should be solved before their calculation.
+\end_layout
+
+\begin_layout Subsection
+Other possible collective variables
+\end_layout
+
+\begin_layout Standard
+The list of collective variables that might be used to analyze molecular
+ systems is very long, and we will not mention all of them here.
+ Keep in mind that any function of the atomic coordinates or of the cell
+ parameters can in principle be used.
+ It is much safer to use CVs that are invariant for rigid translations of
+ the whole system (thus avoid using positions directly, rather use distances).
+ Any function of the variables mentioned above can be used.
+ Other variables that are commonly used in specific contexts are for instance:
+ path collective variables, Steinhard parameters, secondary structure content,
+ principal components, experimental observables (e.g.
+ NMR, SAXS), etc.
 \end_layout
 
 \begin_layout Section
@@ -482,6 +659,109 @@ Take its logarithm and multiply by
  to have energy units.
 \end_layout
 
+\begin_layout Subsection
+Changing variables
+\end_layout
+
+\begin_layout Standard
+Always keep in mind that 
+\begin_inset Formula $F$
+\end_inset
+
+ is just a probability in energy units, and thus is subject to the same
+ rules of a probability density when changing variables.
+ For instance, if you know the probability as a function of the distance
+ between two particles 
+\begin_inset Formula $r$
+\end_inset
+
+ and want to compute the probability as a function of their coordination
+ 
+\begin_inset Formula $c=\left(1+r/r_{0}\right)^{-6}$
+\end_inset
+
+ you should use the following rule
+\begin_inset Formula 
+\[
+P(c)dc=P(r)dr=P(r)\left|\frac{dr}{dc}\right|dc
+\]
+
+\end_inset
+
+Since 
+\begin_inset Formula $r=r_{0}\left(c^{-1/6}-1\right)$
+\end_inset
+
+, 
+\begin_inset Formula $\left|\frac{dr}{dc}\right|=\frac{1}{6}r_{0}c^{-7/6}$
+\end_inset
+
+, thus 
+\begin_inset Formula $P(c)\propto P(r)c^{-7/6}$
+\end_inset
+
+.
+ Thus
+\begin_inset Formula 
+\[
+P(c)dc\propto P(r)c^{-\frac{7}{6}}dc
+\]
+
+\end_inset
+
+As a consequence, if we know 
+\begin_inset Formula $F(r)$
+\end_inset
+
+, we can compute 
+\begin_inset Formula $F(c)$
+\end_inset
+
+ as 
+\begin_inset Formula 
+\[
+F(c)=F(r_{0}\left(c^{-1/6}-1\right))+\frac{7}{6}k_{B}T\log c+C
+\]
+
+\end_inset
+
+Notice that the extra term would add an infinitely deep free-energy well
+ at low 
+\begin_inset Formula $c$
+\end_inset
+
+ (large distance).
+\end_layout
+
+\begin_layout Subsection
+Entropic effects
+\end_layout
+
+\begin_layout Standard
+Another interesting consequence of the fact that 
+\begin_inset Formula $F$
+\end_inset
+
+ represents a probability is that it implicitly contains entropic effects.
+ Consider two non-interacting particles and measure the probability of finding
+ them at a given distance.
+ Since all the possible distance vectors are equiprobable, 
+\begin_inset Formula $P(r)\propto r^{2}$
+\end_inset
+
+.
+ Thus, the free-energy profile associated to their distance is 
+\begin_inset Formula $F(r)=-2k_{B}T\log r$
+\end_inset
+
+.
+ This is an entropic contribution.
+\end_layout
+
+\begin_layout Subsection
+Integrating free-energy landscapes
+\end_layout
+
 \begin_layout Standard
 Sometime instead of being interested in the free-energy associated to a
  single value of 
@@ -548,7 +828,7 @@ anti
  state by 0.83 kcal/mol the two states will have the same probability.
 \end_layout
 
-\begin_layout Section
+\begin_layout Subsection
 Overlapping metastable states
 \end_layout
 
@@ -651,7 +931,7 @@ Enhancing transitions
 \begin_layout Standard
 Let's now imagine that the value of the collective variable is sufficient
  to completely characterize the state of the system.
- Obviously, knowing 
+ As discussed, knowing 
 \begin_inset Formula $s$
 \end_inset
 
@@ -707,11 +987,19 @@ Let's also consider
 \begin_inset Formula $s$
 \end_inset
 
- can only take three possible values for 
-\begin_inset Formula $s$
+ can only take three possible values (
+\begin_inset Formula $A$
 \end_inset
 
- (A, B and C), such that to go from 
+, 
+\begin_inset Formula $B$
+\end_inset
+
+ and 
+\begin_inset Formula $C$
+\end_inset
+
+), such that to go from 
 \begin_inset Formula $A$
 \end_inset
 
@@ -787,14 +1075,108 @@ free energy barrier
  the transition state of a reaction.
 \end_layout
 
-\begin_layout Section
+\begin_layout Subsection
+Again on changing variables
+\end_layout
+
+\begin_layout Standard
+The fact that the free-energy function is affected by a change of variable
+ should make you think about the meaning of a 
+\begin_inset Quotes eld
+\end_inset
+
+free energy barrier
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Imagine that you have a system which exhibits a free-energy barrier on
+ the distance between two atoms 
+\begin_inset Formula $F(r)$
+\end_inset
+
+.
+ It is always possible to change variable and describe the system using
+ as a CV a non linear function of the distance between the two atoms such
+ that 
+\begin_inset Formula $F(s)$
+\end_inset
+
+ does not have any free-energy barrier.
+ When looking at the dynamics of 
+\begin_inset Formula $s$
+\end_inset
+
+, we will see that although there is no barrier (i.e.
+ all values of 
+\begin_inset Formula $s$
+\end_inset
+
+ are equiprobable) still the dynamics will be very slow.
+ A high free-energy barrier in 
+\begin_inset Formula $r$
+\end_inset
+
+ is translated into a small diffusion coefficient in 
+\begin_inset Formula $s$
+\end_inset
+
+.
+ Thus the presence of a barrier does not guarantee that the transition is
+ a slow process, and viceversa.
+\end_layout
+
+\begin_layout Standard
+In the three state example above, one might think that the state 
+\begin_inset Formula $B$
+\end_inset
+
+ has a very low probability not because transitions 
+\begin_inset Formula $A\rightarrow B$
+\end_inset
+
+ and 
+\begin_inset Formula $C\rightarrow B$
+\end_inset
+
+ are very infrequent, but because transitions 
+\begin_inset Formula $B\rightarrow A$
+\end_inset
+
+ and 
+\begin_inset Formula $B\rightarrow C$
+\end_inset
+
+ are very frequent.
+\end_layout
+
+\begin_layout Standard
+Which is the solution of this paradox? A free-energy barrier is going to
+ lead to rare transitions only if it is observed of a CV for which the diffusion
+ constant is approximately constant.
+ Notice that a change of a few kcal/mol in a barrier would be compensated
+ by a change of orders of magnitute of the diffusion constant, so that typically
+ barriers of several kcal/mol are 
+\begin_inset Quotes eld
+\end_inset
+
+true
+\begin_inset Quotes erd
+\end_inset
+
+ barriers.
+ Still, when using highly nonlinear CVs one should pay attention to this
+ issue.
+\end_layout
+
+\begin_layout Subsection
 Troubles with transition states
 \end_layout
 
 \begin_layout Standard
 To be useful in enhanced sampling techniques, CVs should be able to identify
  transition states.
- Let's make an example where it is not verified.
+ Let's make an example where this is not verified.
  Let's start with a Markovian system with three states (
 \begin_inset Formula $A$
 \end_inset
@@ -884,7 +1266,7 @@ Our variable
 \end_layout
 
 \begin_layout Section
-Comments
+Conclusions
 \end_layout
 
 \begin_layout Standard
@@ -913,8 +1295,8 @@ running MD again
  search is available.
  Learning how to combine existing CVs in PLUMED can significantly speedup
  your workflow.
- Finally, consider that once you will have found a CV that works well, the
- choice of the CV should be considered a 
+ Finally, consider that once you will have found a CV that works well for
+ biased sampling, the choice of the CV should be considered a 
 \emph on
 result
 \emph default
@@ -928,7 +1310,8 @@ Summary
 
 \begin_layout Itemize
 Collective variables are generic functions of the microscopic coordinates
- of system (hypothetically including velocities, though this is very rare).
+ of a system (hypothetically including velocities, though this is very rarely
+ done).
 \end_layout
 
 \begin_layout Itemize
@@ -937,14 +1320,14 @@ To be useful in analysis, a collective variable should at least be able
 \end_layout
 
 \begin_layout Itemize
-When used for biasing trajectories, variables should be continuous.
-\end_layout
-
-\begin_layout Itemize
 To be useful in enhanced sampling methods based on collective variables
  (e.g umbrella sampling, metadynamics, etc; you will learn more later about
  these methods), a collective variable should in addition be able to correctly
  distinguish the transition states from the metastable conformations.
+\end_layout
+
+\begin_layout Itemize
+When used for biasing trajectories, variables should be made continuous.
 \end_layout
 
 \end_body
